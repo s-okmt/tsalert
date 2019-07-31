@@ -1,11 +1,11 @@
 // ==UserScript==
 // @name         Timesheet alert
-// @namespace    http://fms010n.corp.toyo-eng.com/pls/QE_10_DAD/qe_proc_login
-// @version      0.2
+// @namespace    https://github.com/s-okmt/tsalert
+// @version      0.3
 // @description  Inform inconsistency of TOYO timesheet before submission
 // @author       S. Okamoto
-// @match        http://fms010n.corp.toyo-eng.com/pls/QE_10_DAD/qe_proc_qe*
-// @match        http://fms010n.corp.toyo-eng.com/pls/QE_10_DAD/qe_pack_qe*
+// @match        http://*.corp.toyo-eng.com/pls/QE_10_DAD/qe_proc_qe*
+// @match        http://*.corp.toyo-eng.com/pls/QE_10_DAD/qe_pack_qe*
 // @grant        none
 // ==/UserScript==
 // a function that loads jQuery and calls a callback function when jQuery has finished loading
@@ -29,6 +29,17 @@ function addJQuery(callback) {
 
 // the guts of this userscript
 function main() {
+  $("select[name^=drp_st]").each(function(i, elem) {
+    $(elem)
+      .parents("tr")
+      .append(
+        '<button type="button" id="sb_' +
+          $(elem)
+            .attr("name")
+            .substr(-2) +
+          '">Set balance</button>'
+      );
+  });
   const sum_st_selector =
     "body > div > div > div > div > div > div > table > tbody > tr:eq(1) > td:eq(0) > font";
   const sum_ot_selector =
@@ -152,6 +163,34 @@ function main() {
     }
     if (!is_err) {
       $(message_selector).text("");
+    }
+  });
+  $("[id^=sb]").on("click", function() {
+    const work_hour = $(work_hour_selector).text();
+    const sum_st = $(sum_st_selector).text();
+    const sum_ot = $(sum_ot_selector).text();
+    const index_row = $(this)
+      .attr("id")
+      .substr(-2);
+    const st_selector = "[name=drp_st" + index_row + "]";
+    const ot_selector = "[name=drp_ot" + index_row + "]";
+    const current_st = Number($(st_selector).val());
+    const current_ot = Number($(ot_selector).val());
+    let st_rest = 7.5;
+    if (work_hour == 0) {
+      $(message_selector).text("Set WORKING HOURS first");
+    } else {
+      if (work_hour < 7.5) {
+        st_rest = work_hour;
+      }
+      const st_input = (st_rest - sum_st + current_st).toFixed(1);
+      const ot_input = (work_hour - st_rest - sum_ot + current_ot).toFixed(1);
+      $(st_selector).val(st_input);
+      $(ot_selector).val(ot_input);
+      $(st_selector).trigger("change");
+      if ($(message_selector).text() == "") {
+        $(message_selector).text("Balance work hours are inputted.");
+      }
     }
   });
 }
