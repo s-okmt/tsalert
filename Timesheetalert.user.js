@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Timesheet alert
 // @namespace    https://github.com/s-okmt/tsalert
-// @version      0.3
+// @version      0.3.1
 // @description  Inform inconsistency of TOYO timesheet before submission
 // @author       S. Okamoto
 // @match        http://*.corp.toyo-eng.com/pls/QE_10_DAD/qe_proc_qe*
@@ -190,6 +190,12 @@ function main() {
       $(st_selector).trigger("change");
       if ($(message_selector).text() == "") {
         $(message_selector).text("Balance work hours are inputted.");
+      }
+      if ($(st_selector).val() == "") {
+        $(st_selector).val("0.0");
+      }
+      if ($(ot_selector).val() == "") {
+        $(ot_selector).val("0.0");
       }
     }
   });
