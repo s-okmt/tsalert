@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Timesheet alert
 // @namespace    https://github.com/s-okmt/tsalert
-// @version      0.3.1
+// @version      0.4.0
 // @description  Inform inconsistency of TOYO timesheet before submission
 // @author       S. Okamoto
 // @match        http://*.corp.toyo-eng.com/pls/QE_10_DAD/qe_proc_qe*
@@ -60,6 +60,12 @@ function main() {
       return 3;
     }
   };
+  if (
+    $("[name=drp_ft]").val() == 7.5 &&
+    Number($(work_hour_selector).text()) != 0
+  ) {
+    $("[name=drp_ft]").val(Number($(work_hour_selector).text()).toFixed(1));
+  }
   const parseTime = function(value, is_start) {
     if (typeof value === undefined || value === "zero") {
       return 0;
@@ -76,6 +82,7 @@ function main() {
     let ft_hour = 0;
     let mid_hour = 0;
     let hol_hour = 0;
+    let nonft_hour = 0;
     let sum_st = 0;
     let sum_ot = 0;
     let sum_total = 0;
@@ -113,10 +120,11 @@ function main() {
       work_hour = 0;
     }
     $(work_hour_selector).text(work_hour.toPrecision(setDem(work_hour)));
-    ft_hour = Number($("[name=drp_ft]").val());
     mid_hour = Number($("[name=drp_midnight]").val());
     hol_hour = Number($("[name=drp_htime]").val());
-    mh_total = ft_hour + mid_hour + hol_hour;
+    nonft_hour = Number($("[name=drp_nonft]").val());
+    ft_hour = Number($("[name=drp_ft]").val());
+    mh_total = ft_hour + mid_hour + hol_hour + nonft_hour;
     is_st_ok = sum_st <= 7.5;
     if ($("[name=drp_ft]").attr("type") == "hidden") {
       is_flex = false;
@@ -165,7 +173,48 @@ function main() {
       $(message_selector).text("");
     }
   });
+  $(
+    "[name=drp_nonft],[name=drp_midnight],[name=drp_htime],[name=drp_STime],[name=drp_FTime],[name=drp_rhours]"
+  ).change(function() {
+    const isholiday =
+      !$("[name=drp_work]")
+        .val()
+        .indexOf("80") ||
+      !$("[name=drp_work]")
+        .val()
+        .indexOf("9");
+    const work_hour =
+      parseTime($("[name=drp_FTime]").val(), false) -
+      parseTime($("[name=drp_STime]").val(), true) -
+      Number($("[name=drp_rhours]").val());
+    const mid_hour = Number($("[name=drp_midnight]").val());
+    const hol_hour = Number($("[name=drp_htime]").val());
+    const nonft_hour = Number($("[name=drp_nonft]").val());
+    const ft_hour = work_hour - mid_hour - hol_hour - nonft_hour;
+    if (isholiday) {
+      $("[name=drp_htime]").val((ft_hour + hol_hour).toFixed(1));
+    } else {
+      $("[name=drp_ft]").val(ft_hour.toFixed(1));
+    }
+    if (
+      ft_hour != 0 &&
+      !$("[name=drp_work]")
+        .val()
+        .indexOf("80")
+    ) {
+      $(message_selector).text(
+        "Change working status to holiday work (休日出勤) before submit"
+      );
+    }
+  });
   $("[id^=sb]").on("click", function() {
+    const isholiday =
+      !$("[name=drp_work]")
+        .val()
+        .indexOf("80") ||
+      !$("[name=drp_work]")
+        .val()
+        .indexOf("9");
     const work_hour = $(work_hour_selector).text();
     const sum_st = $(sum_st_selector).text();
     const sum_ot = $(sum_ot_selector).text();
@@ -183,11 +232,18 @@ function main() {
       if (work_hour < 7.5) {
         st_rest = work_hour;
       }
-      const st_input = (st_rest - sum_st + current_st).toFixed(1);
-      const ot_input = (work_hour - st_rest - sum_ot + current_ot).toFixed(1);
-      $(st_selector).val(st_input);
-      $(ot_selector).val(ot_input);
-      $(st_selector).trigger("change");
+      const st_input = st_rest - sum_st + current_st;
+      const ot_input = work_hour - st_rest - sum_ot + current_ot;
+      if (isholiday) {
+        $(ot_selector).val((st_input + ot_input).toFixed(1));
+        console.log("st_input " + st_input.toFixed(1));
+        console.log("ot_input " + ot_input.toFixed(1));
+        $(ot_selector).trigger("change");
+      } else {
+        $(st_selector).val(st_input.toFixed(1));
+        $(ot_selector).val(ot_input.toFixed(1));
+        $(st_selector).trigger("change");
+      }
       if ($(message_selector).text() == "") {
         $(message_selector).text("Balance work hours are inputted.");
       }
