@@ -216,16 +216,6 @@ function main() {
     } else {
       $("[name=drp_ft]").val(ft_hour.toFixed(1));
     }
-    // if (
-    //   ft_hour != 0 &&
-    //   !$("[name=drp_work]")
-    //     .val()
-    //     .indexOf("80")
-    // ) {
-    //   $(message_selector).text(
-    //     "Change working status to holiday work ("+status_holiday_work+") before submit"
-    //   );
-    // }
     if ($("[name=drp_ft]").attr("type") === "hidden") {
       $("[name=drp_ft]").val(0);
     }
