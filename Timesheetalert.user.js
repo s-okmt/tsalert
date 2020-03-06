@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Timesheet alert
 // @namespace    https://github.com/s-okmt/tsalert
-// @version      0.5.0
+// @version      0.5.1
 // @description  Inform inconsistency of TOYO timesheet before submission
 // @author       S. Okamoto
 // @match        http://*.corp.toyo-eng.com/pls/QE_10_DAD/qe_proc_qe*
@@ -33,7 +33,7 @@ function addJQuery(callback) {
 function main() {
   console.log("start function");
   console.log($("[name=drp_ft]").val());
-  $("select[name^=drp_st]").each(function(_i, elem) {
+  $("select[name^=drp_st]").each(function(i, elem) {
     $(elem)
       .parents("tr")
       .append(
@@ -170,6 +170,7 @@ function main() {
       }
       is_err = true;
     }
+    $(message_selector).css({ color: "black", fontWeight: "normal" });
     if (is_st_ok) {
       $(sum_st_selector).css({ color: "black" });
     }
@@ -241,6 +242,7 @@ function main() {
     let st_rest = 7.5;
     if (work_hour == 0) {
       $(message_selector).text("Set WORKING HOURS first");
+      $(message_selector).css({ color: "black", fontWeight: "normal" });
     } else {
       if (work_hour < 7.5) {
         st_rest = work_hour;
@@ -259,12 +261,20 @@ function main() {
       }
       if ($(message_selector).text() == "") {
         $(message_selector).text("Balance work hours are inputted.");
+        $(message_selector).css({ color: "black", fontWeight: "normal" });
       }
       if ($(st_selector).val() == "") {
         $(st_selector).val("0.0");
       }
       if ($(ot_selector).val() == "") {
         $(ot_selector).val("0.0");
+      }
+      if (
+        parseTime($("[name=drp_STime]").val(), true) < 5 ||
+        parseTime($("[name=drp_FTime]").val(), false) > 22
+      ) {
+        $(message_selector).text("Check midnight hours before submit!");
+        $(message_selector).css({ color: "red", fontWeight: "bold" });
       }
     }
   });
