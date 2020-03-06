@@ -33,7 +33,7 @@ function addJQuery(callback) {
 function main() {
   console.log("start function");
   console.log($("[name=drp_ft]").val());
-  $("select[name^=drp_st]").each(function(i, elem) {
+  $("select[name^=drp_st]").each(function(_i, elem) {
     $(elem)
       .parents("tr")
       .append(
@@ -203,7 +203,7 @@ function main() {
           .val()
           .indexOf("80")
       ) {
-        $("[name=drp_work]").val("90 ????");
+        $("[name=drp_work]").prop("selectedIndex", 9);
       }
       if (
         ft_hour + hol_hour < 4 &&
@@ -211,21 +211,11 @@ function main() {
           .val()
           .indexOf("9")
       ) {
-        $("[name=drp_work]").val("80 ???");
+        $("[name=drp_work]").prop("selectedIndex", 8);
       }
     } else {
       $("[name=drp_ft]").val(ft_hour.toFixed(1));
     }
-    // if (
-    //   ft_hour != 0 &&
-    //   !$("[name=drp_work]")
-    //     .val()
-    //     .indexOf("80")
-    // ) {
-    //   $(message_selector).text(
-    //     "Change working status to holiday work (????) before submit"
-    //   );
-    // }
     if ($("[name=drp_ft]").attr("type") === "hidden") {
       $("[name=drp_ft]").val(0);
     }
