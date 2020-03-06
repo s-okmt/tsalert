@@ -31,6 +31,8 @@ function addJQuery(callback) {
 
 // the guts of this userscript
 function main() {
+  console.log("start function");
+  console.log($("[name=drp_ft]").val());
   $("select[name^=drp_st]").each(function(i, elem) {
     $(elem)
       .parents("tr")
@@ -195,18 +197,37 @@ function main() {
     const ft_hour = work_hour - mid_hour - hol_hour - nonft_hour;
     if (isholiday) {
       $("[name=drp_htime]").val((ft_hour + hol_hour).toFixed(1));
+      if (
+        ft_hour + hol_hour >= 4 &&
+        !$("[name=drp_work]")
+          .val()
+          .indexOf("80")
+      ) {
+        $("[name=drp_work]").val("90 ????");
+      }
+      if (
+        ft_hour + hol_hour < 4 &&
+        !$("[name=drp_work]")
+          .val()
+          .indexOf("9")
+      ) {
+        $("[name=drp_work]").val("80 ???");
+      }
     } else {
       $("[name=drp_ft]").val(ft_hour.toFixed(1));
     }
-    if (
-      ft_hour != 0 &&
-      !$("[name=drp_work]")
-        .val()
-        .indexOf("80")
-    ) {
-      $(message_selector).text(
-        "Change working status to holiday work (休日出勤) before submit"
-      );
+    // if (
+    //   ft_hour != 0 &&
+    //   !$("[name=drp_work]")
+    //     .val()
+    //     .indexOf("80")
+    // ) {
+    //   $(message_selector).text(
+    //     "Change working status to holiday work (????) before submit"
+    //   );
+    // }
+    if ($("[name=drp_ft]").attr("type") === "hidden") {
+      $("[name=drp_ft]").val(0);
     }
   });
   $("[id^=sb]").on("click", function() {
