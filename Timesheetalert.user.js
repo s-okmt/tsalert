@@ -6,8 +6,8 @@
 // @author       S. Okamoto
 // @match        http://*.corp.toyo-eng.com/pls/QE_10_DAD/qe_proc_qe*
 // @match        http://*.corp.toyo-eng.com/pls/QE_10_DAD/qe_pack_qe*
-// @match        https://toyo*.mind-mobile.jp/pls/QE_10_DAD/,DanaInfo=*.corp.toyo-eng.com+qe_proc_qe*
-// @match        https://toyo*.mind-mobile.jp/pls/QE_10_DAD/,DanaInfo=*.corp.toyo-eng.com+qe_pack_qe*
+// @match        https://*.mind-mobile.jp/pls/QE_10_DAD/,DanaInfo=*.corp.toyo-eng.com+qe_proc_qe*
+// @match        https://*.mind-mobile.jp/pls/QE_10_DAD/,DanaInfo=*.corp.toyo-eng.com+qe_pack_qe*
 // @grant        none
 // ==/UserScript==
 // a function that loads jQuery and calls a callback function when jQuery has finished loading
