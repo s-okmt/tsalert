@@ -1,13 +1,13 @@
 // ==UserScript==
 // @name         Timesheet alert
 // @namespace    https://github.com/s-okmt/tsalert
-// @version      0.5.1
+// @version      0.5.2
 // @description  Inform inconsistency of TOYO timesheet before submission
 // @author       S. Okamoto
 // @match        http://*.corp.toyo-eng.com/pls/QE_10_DAD/qe_proc_qe*
 // @match        http://*.corp.toyo-eng.com/pls/QE_10_DAD/qe_pack_qe*
-// @match        https://toyo.mind-mobile.jp/pls/QE_10_DAD/,DanaInfo=fms010n.corp.toyo-eng.com+qe_proc_qe*
-// @match        https://toyo.mind-mobile.jp/pls/QE_10_DAD/,DanaInfo=fms010n.corp.toyo-eng.com+qe_pack_qe*
+// @match        https://toyo*.mind-mobile.jp/pls/QE_10_DAD/,DanaInfo=*.corp.toyo-eng.com+qe_proc_qe*
+// @match        https://toyo*.mind-mobile.jp/pls/QE_10_DAD/,DanaInfo=*.corp.toyo-eng.com+qe_pack_qe*
 // @grant        none
 // ==/UserScript==
 // a function that loads jQuery and calls a callback function when jQuery has finished loading
@@ -19,7 +19,7 @@ function addJQuery(callback) {
   );
   script.addEventListener(
     "load",
-    function() {
+    function () {
       var script = document.createElement("script");
       script.textContent = "(" + callback.toString() + ")();";
       document.body.appendChild(script);
@@ -33,14 +33,12 @@ function addJQuery(callback) {
 function main() {
   console.log("start function");
   console.log($("[name=drp_ft]").val());
-  $("select[name^=drp_st]").each(function(i, elem) {
+  $("select[name^=drp_st]").each(function (i, elem) {
     $(elem)
       .parents("tr")
       .append(
         '<button type="button" id="sb_' +
-          $(elem)
-            .attr("name")
-            .substr(-2) +
+          $(elem).attr("name").substr(-2) +
           '">Set balance</button>'
       );
   });
@@ -53,7 +51,7 @@ function main() {
   const message_selector = "body > div > div > table > tbody > tr > td:eq(1)";
   const work_hour_selector =
     "body > div > div > div > table> tbody > tr > td:eq(7) > font";
-  const setDem = function(value) {
+  const setDem = function (value) {
     if (value === 0) {
       return 2;
     } else if (value < 1) {
@@ -70,7 +68,7 @@ function main() {
   ) {
     $("[name=drp_ft]").val(Number($(work_hour_selector).text()).toFixed(1));
   }
-  const parseTime = function(value, is_start) {
+  const parseTime = function (value, is_start) {
     if (typeof value === undefined || value === "zero") {
       return 0;
     }
@@ -81,7 +79,7 @@ function main() {
     }
     return hour + min / 60;
   };
-  $("[name^=drp_]").change(function() {
+  $("[name^=drp_]").change(function () {
     let work_hour = 0;
     let ft_hour = 0;
     let mid_hour = 0;
@@ -180,14 +178,10 @@ function main() {
   });
   $(
     "[name=drp_nonft],[name=drp_midnight],[name=drp_htime],[name=drp_STime],[name=drp_FTime],[name=drp_rhours]"
-  ).change(function() {
+  ).change(function () {
     const isholiday =
-      !$("[name=drp_work]")
-        .val()
-        .indexOf("80") ||
-      !$("[name=drp_work]")
-        .val()
-        .indexOf("9");
+      !$("[name=drp_work]").val().indexOf("80") ||
+      !$("[name=drp_work]").val().indexOf("9");
     const work_hour =
       parseTime($("[name=drp_FTime]").val(), false) -
       parseTime($("[name=drp_STime]").val(), true) -
@@ -200,18 +194,11 @@ function main() {
       $("[name=drp_htime]").val((ft_hour + hol_hour).toFixed(1));
       if (
         ft_hour + hol_hour >= 4 &&
-        !$("[name=drp_work]")
-          .val()
-          .indexOf("80")
+        !$("[name=drp_work]").val().indexOf("80")
       ) {
         $("[name=drp_work]").prop("selectedIndex", 9);
       }
-      if (
-        ft_hour + hol_hour < 4 &&
-        !$("[name=drp_work]")
-          .val()
-          .indexOf("9")
-      ) {
+      if (ft_hour + hol_hour < 4 && !$("[name=drp_work]").val().indexOf("9")) {
         $("[name=drp_work]").prop("selectedIndex", 8);
       }
     } else {
@@ -221,20 +208,14 @@ function main() {
       $("[name=drp_ft]").val(0);
     }
   });
-  $("[id^=sb]").on("click", function() {
+  $("[id^=sb]").on("click", function () {
     const isholiday =
-      !$("[name=drp_work]")
-        .val()
-        .indexOf("80") ||
-      !$("[name=drp_work]")
-        .val()
-        .indexOf("9");
+      !$("[name=drp_work]").val().indexOf("80") ||
+      !$("[name=drp_work]").val().indexOf("9");
     const work_hour = $(work_hour_selector).text();
     const sum_st = $(sum_st_selector).text();
     const sum_ot = $(sum_ot_selector).text();
-    const index_row = $(this)
-      .attr("id")
-      .substr(-2);
+    const index_row = $(this).attr("id").substr(-2);
     const st_selector = "[name=drp_st" + index_row + "]";
     const ot_selector = "[name=drp_ot" + index_row + "]";
     const current_st = Number($(st_selector).val());
