@@ -38,8 +38,8 @@ function main() {
       .parents("tr")
       .append(
         '<button type="button" id="sb_' +
-          $(elem).attr("name").substr(-2) +
-          '">Set balance</button>'
+        $(elem).attr("name").substr(-2) +
+        '">Set balance</button>'
       );
   });
   const sum_st_selector =
@@ -241,7 +241,7 @@ function main() {
         $(st_selector).trigger("change");
       }
       if ($(message_selector).text() == "") {
-        $(message_selector).text("Balance work hours are inputted.");
+        $(message_selector).text("Balance work hours are input.");
         $(message_selector).css({ color: "black", fontWeight: "normal" });
       }
       if ($(st_selector).val() == "") {
